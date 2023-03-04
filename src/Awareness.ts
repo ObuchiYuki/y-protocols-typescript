@@ -48,7 +48,7 @@ export class Awareness extends Observable<string> {
     states: Map<number, State> = new Map()
     meta: Map<number, MetaClientState> = new Map()
 
-    private _checkTimer: NodeJS.Timer | undefined
+    private _checkTimer: number | undefined
 
     constructor(document: Y.Doc) {
         super()
@@ -96,10 +96,10 @@ export class Awareness extends Observable<string> {
         }
         this.meta.set(clientID, { clock: clock, lastUpdated: time.getUnixTime() })
 
-        const added = []
-        const updated = []
-        const filteredUpdated = []
-        const removed = []
+        const added: number[] = []
+        const updated: number[] = []
+        const filteredUpdated: number[] = []
+        const removed: number[] = []
         if (state === null) {
             removed.push(clientID)
         } else if (prevState == null) {
@@ -126,7 +126,7 @@ export class Awareness extends Observable<string> {
      * This change will be propagated to remote clients.
      */
     removeStates(clients: number[], origin: unknown){
-        const removed = []
+        const removed: number[] = []
         for (let i = 0; i < clients.length; i++) {
             const clientID = clients[i]
             if (!this.states.has(clientID)) continue

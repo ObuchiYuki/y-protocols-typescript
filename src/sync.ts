@@ -1,7 +1,3 @@
-/**
- * @module sync-protocol
- */
-
 import * as encoding from 'lib0/encoding'
 import * as decoding from 'lib0/decoding'
 import * as Y from 'yjs'
@@ -39,6 +35,14 @@ export module MessageType {
     export const syncStep1 = 0
     export const syncStep2 = 1
     export const update = 2
+
+    export const toString = (value: MessageType): string => {
+        switch (value) {
+            case MessageType.syncStep1: return "syncStep1"
+            case MessageType.syncStep2: return "syncStep2"
+            case MessageType.update: return "update"
+        }
+    }
 }
 
 /**
