@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean ; tsc",
-    "publish": "npm run build ; git add .; git commit -m commit; git push"
+    "push": "npm run build ; git add .; git commit -m commit; git push"
   },
   "dependencies": {
     "lib0": "^0.2.63",
