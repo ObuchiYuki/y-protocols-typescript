@@ -1,3 +1,3 @@
-export * from "./auth";
-export * from "./sync";
+export * as auth from "./auth";
+export * as sync from "./sync";
 export * from "./Awareness";
