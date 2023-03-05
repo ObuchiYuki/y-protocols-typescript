@@ -14,8 +14,8 @@ export type State = {
 };
 export declare const outdatedTimeout = 30000;
 export interface Awareness {
-    on(name: "update", block: (update: AwarenessUpdate) => void): void;
-    on(name: "change", block: (update: AwarenessUpdate) => void): void;
+    on(name: "update", block: (update: AwarenessUpdate, origin: unknown) => void): void;
+    on(name: "change", block: (update: AwarenessUpdate, origin: unknown) => void): void;
     on(name: "destroy", block: () => void): void;
 }
 /**
