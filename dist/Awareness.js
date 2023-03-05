@@ -1,12 +1,15 @@
-import * as encoding from 'lib0/encoding';
-import * as decoding from 'lib0/decoding';
-import * as time from 'lib0/time';
-import * as math from 'lib0/math';
-import { Observable } from 'lib0/observable';
-import * as f from 'lib0/function';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Awareness = exports.outdatedTimeout = void 0;
+const encoding = require("lib0/encoding");
+const decoding = require("lib0/decoding");
+const time = require("lib0/time");
+const math = require("lib0/math");
+const observable_1 = require("lib0/observable");
+const f = require("lib0/function");
 // ============================================================================================ //
 // MARK: Const
-export const outdatedTimeout = 30000;
+exports.outdatedTimeout = 30000;
 /**
  * The Awareness class implements a simple shared state protocol that can be used for non-persistent data like awareness information
  * (cursor, username, status, ..). Each client can update its own local state and listen to state changes of
@@ -23,7 +26,7 @@ export const outdatedTimeout = 30000;
  *
  * Awareness states must be updated every 30 seconds. Otherwise the Awareness instance will delete the client state.
  */
-export class Awareness extends Observable {
+class Awareness extends observable_1.Observable {
     constructor(document) {
         super();
         // Maps from client id to client state
@@ -36,20 +39,20 @@ export class Awareness extends Observable {
             const meta = this.meta.get(this.clientID);
             if (meta == null)
                 return;
-            if (this.localState !== null && outdatedTimeout / 2 <= now - meta.lastUpdated) {
+            if (this.localState !== null && exports.outdatedTimeout / 2 <= now - meta.lastUpdated) {
                 // renew local clock
                 this.localState = this.localState;
             }
             const remove = [];
             this.meta.forEach((meta, clientid) => {
-                if (clientid !== this.clientID && outdatedTimeout <= now - meta.lastUpdated && this.states.has(clientid)) {
+                if (clientid !== this.clientID && exports.outdatedTimeout <= now - meta.lastUpdated && this.states.has(clientid)) {
                     remove.push(clientid);
                 }
             });
             if (remove.length > 0) {
                 this.removeStates(remove, 'timeout');
             }
-        }, math.floor(outdatedTimeout / 10)));
+        }, math.floor(exports.outdatedTimeout / 10)));
         document.on('destroy', () => { this.destroy(); });
         this.localState = {};
     }
@@ -219,3 +222,4 @@ export class Awareness extends Observable {
         clearInterval(this._checkTimer);
     }
 }
+exports.Awareness = Awareness;

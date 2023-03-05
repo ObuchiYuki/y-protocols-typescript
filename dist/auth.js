@@ -1,12 +1,17 @@
-import * as encoding from 'lib0/encoding';
-import * as decoding from 'lib0/decoding';
-export const messagePermissionDenied = 0;
-export const writePermissionDenied = (encoder, reason) => {
-    encoding.writeVarUint(encoder, messagePermissionDenied);
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.readAuthMessage = exports.writePermissionDenied = exports.messagePermissionDenied = void 0;
+const encoding = require("lib0/encoding");
+const decoding = require("lib0/decoding");
+exports.messagePermissionDenied = 0;
+const writePermissionDenied = (encoder, reason) => {
+    encoding.writeVarUint(encoder, exports.messagePermissionDenied);
     encoding.writeVarString(encoder, reason);
 };
-export const readAuthMessage = (decoder, y, permissionDeniedHandler) => {
+exports.writePermissionDenied = writePermissionDenied;
+const readAuthMessage = (decoder, y, permissionDeniedHandler) => {
     switch (decoding.readVarUint(decoder)) {
-        case messagePermissionDenied: permissionDeniedHandler(y, decoding.readVarString(decoder));
+        case exports.messagePermissionDenied: permissionDeniedHandler(y, decoding.readVarString(decoder));
     }
 };
+exports.readAuthMessage = readAuthMessage;
