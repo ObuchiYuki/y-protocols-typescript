@@ -1,6 +1,6 @@
-import * as encoding from 'lib0/encoding'
-import * as decoding from 'lib0/decoding'
 import * as Y from 'yjs'
+
+import * as lib0 from 'lib0-typescript'
 
 export type StateMap = Map<number, number>
 
@@ -48,15 +48,15 @@ export module MessageType {
 /**
  * Create a sync step 1 message based on the state of the current shared document.
  */
-export const writeSyncStep1 = (encoder: encoding.Encoder, doc: Y.Doc) => {
-    encoding.writeVarUint(encoder, MessageType.syncStep1)
+export const writeSyncStep1 = (encoder: lib0.Encoder, doc: Y.Doc) => {
+    encoder.writeVarUint(MessageType.syncStep1)
     const sv = Y.encodeStateVector(doc)
-    encoding.writeVarUint8Array(encoder, sv)
+    encoder.writeVarUint8Array(sv)
 }
 
-export const writeSyncStep2 = (encoder: encoding.Encoder, doc: Y.Doc, encodedStateVector?: Uint8Array) => {
-    encoding.writeVarUint(encoder, MessageType.syncStep2)
-    encoding.writeVarUint8Array(encoder, Y.encodeStateAsUpdate(doc, encodedStateVector))
+export const writeSyncStep2 = (encoder: lib0.Encoder, doc: Y.Doc, encodedStateVector?: Uint8Array) => {
+    encoder.writeVarUint(MessageType.syncStep2)
+    encoder.writeVarUint8Array(Y.encodeStateAsUpdate(doc, encodedStateVector))
 }
 
 /**
@@ -65,24 +65,24 @@ export const writeSyncStep2 = (encoder: encoding.Encoder, doc: Y.Doc, encodedSta
  * decoder: The reply to the received message
  * encoder: The received message
  */
-export const readSyncStep1 = (decoder: decoding.Decoder, encoder: encoding.Encoder, doc: Y.Doc) =>
-    writeSyncStep2(encoder, doc, decoding.readVarUint8Array(decoder))
+export const readSyncStep1 = (decoder: lib0.Decoder, encoder: lib0.Encoder, doc: Y.Doc) =>
+    writeSyncStep2(encoder, doc, decoder.readVarUint8Array())
 
 /**
  * Read and apply Structs and then DeleteStore to a y instance.
  */
-export const readSyncStep2 = (decoder: decoding.Decoder, doc: Y.Doc, transactionOrigin: unknown) => {
+export const readSyncStep2 = (decoder: lib0.Decoder, doc: Y.Doc, transactionOrigin: unknown) => {
     try {
-        Y.applyUpdate(doc, decoding.readVarUint8Array(decoder), transactionOrigin)
+        Y.applyUpdate(doc, decoder.readVarUint8Array(), transactionOrigin)
     } catch (error) {
         // This catches errors that are thrown by event handlers
         console.error('Caught error while handling a Yjs update', error)
     }
 }
 
-export const writeUpdate = (encoder: encoding.Encoder, update: Uint8Array) => {
-    encoding.writeVarUint(encoder, MessageType.update)
-    encoding.writeVarUint8Array(encoder, update)
+export const writeUpdate = (encoder: lib0.Encoder, update: Uint8Array) => {
+    encoder.writeVarUint(MessageType.update)
+    encoder.writeVarUint8Array(update)
 }
 
 /**
@@ -96,8 +96,8 @@ export const readUpdate = readSyncStep2
  * @param doc:
  * @param transactionOrigin:
  */
-export const readSyncMessage = (decoder: decoding.Decoder, encoder: encoding.Encoder, doc: Y.Doc, transactionOrigin: unknown) => {
-    const messageType = decoding.readVarUint(decoder)
+export const readSyncMessage = (decoder: lib0.Decoder, encoder: lib0.Encoder, doc: Y.Doc, transactionOrigin: unknown) => {
+    const messageType = decoder.readVarUint()
 
     if (messageType == MessageType.syncStep1) {
         readSyncStep1(decoder, encoder, doc)

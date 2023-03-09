@@ -1,10 +1,6 @@
-import * as encoding from 'lib0/encoding'
-import * as decoding from 'lib0/decoding'
-import * as time from 'lib0/time'
-import * as math from 'lib0/math'
-import { Observable } from 'lib0/observable'
-import * as f from 'lib0/function'
 import * as Y from 'yjs' 
+
+import * as lib0 from "lib0-typescript"
 
 // ============================================================================================ //
 // MARK: Type
@@ -40,7 +36,7 @@ export interface Awareness {
  *
  * Awareness states must be updated every 30 seconds. Otherwise the Awareness instance will delete the client state.
  */
-export class Awareness extends Observable<string> {
+export class Awareness extends lib0.Observable<string> {
     document: Y.Doc
     clientID: number
 
@@ -56,7 +52,7 @@ export class Awareness extends Observable<string> {
         this.clientID = document.clientID
         
         this._checkTimer = (setInterval(() => {
-            const now = time.getUnixTime()
+            const now = Date.now()
             const meta = this.meta.get(this.clientID)
             if (meta == null) return
 
@@ -73,7 +69,7 @@ export class Awareness extends Observable<string> {
             if (remove.length > 0) {
                 this.removeStates(remove, 'timeout')
             }
-        }, math.floor(outdatedTimeout / 10)))
+        }, Math.floor(outdatedTimeout / 10)))
 
         document.on('destroy', () => { this.destroy() })
         this.localState = {}
@@ -94,7 +90,7 @@ export class Awareness extends Observable<string> {
         } else {
             this.states.set(clientID, state)
         }
-        this.meta.set(clientID, { clock: clock, lastUpdated: time.getUnixTime() })
+        this.meta.set(clientID, { clock: clock, lastUpdated: Date.now() })
 
         const added: number[] = []
         const updated: number[] = []
@@ -106,7 +102,7 @@ export class Awareness extends Observable<string> {
             if (state != null) { added.push(clientID) }
         } else {
             updated.push(clientID)
-            if (!f.equalityDeep(prevState, state)) { filteredUpdated.push(clientID) }
+            if (!lib0.isEqual(prevState, state)) { filteredUpdated.push(clientID) }
         }
         if (added.length > 0 || filteredUpdated.length > 0 || removed.length > 0) {
             this.emit('change', [{ added, updated: filteredUpdated, removed }, 'local'])
@@ -135,7 +131,7 @@ export class Awareness extends Observable<string> {
             if (clientID === this.clientID) {
                 const curMeta = this.meta.get(clientID); 
                 if (curMeta == null) continue
-                this.meta.set(clientID, { clock: curMeta.clock + 1, lastUpdated: time.getUnixTime() })
+                this.meta.set(clientID, { clock: curMeta.clock + 1, lastUpdated: Date.now() })
             }
             removed.push(clientID)
         }
@@ -152,35 +148,35 @@ export class Awareness extends Observable<string> {
      * cant hijack somebody elses identity.
      */
     modifyUpdate(update: Uint8Array, modify: (value: unknown) => unknown): Uint8Array {
-        const decoder = decoding.createDecoder(update)
-        const encoder = encoding.createEncoder()
-        const len = decoding.readVarUint(decoder)
-        encoding.writeVarUint(encoder, len)
+        const decoder = new lib0.Decoder(update)
+        const encoder = new lib0.Encoder()
+        const len = decoder.readVarUint()
+        encoder.writeVarUint(len)
         for (let i = 0; i < len; i++) {
-            const clientID = decoding.readVarUint(decoder)
-            const clock = decoding.readVarUint(decoder)
-            const state = JSON.parse(decoding.readVarString(decoder))
+            const clientID = decoder.readVarUint()
+            const clock = decoder.readVarUint()
+            const state = JSON.parse(decoder.readVarString())
             const modifiedState = modify(state)
-            encoding.writeVarUint(encoder, clientID)
-            encoding.writeVarUint(encoder, clock)
-            encoding.writeVarString(encoder, JSON.stringify(modifiedState))
+            encoder.writeVarUint(clientID)
+            encoder.writeVarUint(clock)
+            encoder.writeVarString(JSON.stringify(modifiedState))
         }
-        return encoding.toUint8Array(encoder)
+        return encoder.toUint8Array()
     }
 
     applyUpdate(update: Uint8Array, origin: unknown) {
-        const decoder = decoding.createDecoder(update)
-        const timestamp = time.getUnixTime()
+        const decoder = new lib0.Decoder(update)
+        const timestamp = Date.now()
         const added: number[] = []
         const updated: number[] = []
         const filteredUpdated: number[] = []
         const removed: number[] = []
-        const len = decoding.readVarUint(decoder)
+        const len = decoder.readVarUint()
 
         for (let i = 0; i < len; i++) {
-            const clientID = decoding.readVarUint(decoder)
-            let clock = decoding.readVarUint(decoder)
-            const state = JSON.parse(decoding.readVarString(decoder))
+            const clientID = decoder.readVarUint()
+            let clock = decoder.readVarUint()
+            const state = JSON.parse(decoder.readVarString())
             const clientMeta = this.meta.get(clientID)
             const prevState = this.states.get(clientID)
             const currClock = clientMeta === undefined ? 0 : clientMeta.clock
@@ -204,7 +200,7 @@ export class Awareness extends Observable<string> {
                 } else if (clientMeta !== undefined && state === null) {
                     removed.push(clientID)
                 } else if (state !== null) {
-                    if (!f.equalityDeep(state, prevState)) { filteredUpdated.push(clientID) }
+                    if (!lib0.isEqual(state, prevState)) { filteredUpdated.push(clientID) }
                     updated.push(clientID)
                 }
             }
@@ -219,18 +215,18 @@ export class Awareness extends Observable<string> {
 
     encodeUpdate(clients: number[], states = this.states): Uint8Array|undefined {
         const len = clients.length
-        const encoder = encoding.createEncoder()
-        encoding.writeVarUint(encoder, len)
+        const encoder = new lib0.Encoder()
+        encoder.writeVarUint(len)
         for (let i = 0; i < len; i++) {
             const clientID = clients[i]
             const state = states.get(clientID) || null
             const clock = this.meta.get(clientID)?.clock
             if (clock == null) return
-            encoding.writeVarUint(encoder, clientID)
-            encoding.writeVarUint(encoder, clock)
-            encoding.writeVarString(encoder, JSON.stringify(state))
+            encoder.writeVarUint(clientID)
+            encoder.writeVarUint(clock)
+            encoder.writeVarString(JSON.stringify(state))
         }
-        return encoding.toUint8Array(encoder)
+        return encoder.toUint8Array()
     }
 
     destroy() {

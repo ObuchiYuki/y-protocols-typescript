@@ -1,7 +1,9 @@
 {
   "name": "y-protocols-typescript",
   "version": "1.0.0",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "clean": "rm -rf dist",
@@ -9,7 +11,7 @@
     "push": "npm run build ; git add .; git commit -m commit; git push"
   },
   "dependencies": {
-    "lib0": "^0.2.63",
+    "lib0-typescript": "github:ObuchiYuki/lib0-typescript",
     "typescript": "^4.9.5",
     "yjs": "^13.5.48"
   }
