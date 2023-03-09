@@ -1,6 +1,5 @@
-import * as encoding from 'lib0/encoding';
-import * as decoding from 'lib0/decoding';
 import * as Y from 'yjs';
+import * as lib0 from 'lib0-typescript';
 export type StateMap = Map<number, number>;
 /**
  * Core Yjs defines two message types:
@@ -36,28 +35,28 @@ export declare module MessageType {
 /**
  * Create a sync step 1 message based on the state of the current shared document.
  */
-export declare const writeSyncStep1: (encoder: encoding.Encoder, doc: Y.Doc) => void;
-export declare const writeSyncStep2: (encoder: encoding.Encoder, doc: Y.Doc, encodedStateVector?: Uint8Array) => void;
+export declare const writeSyncStep1: (encoder: lib0.Encoder, doc: Y.Doc) => void;
+export declare const writeSyncStep2: (encoder: lib0.Encoder, doc: Y.Doc, encodedStateVector?: Uint8Array) => void;
 /**
  * Read SyncStep1 message and reply with SyncStep2.
  *
  * decoder: The reply to the received message
  * encoder: The received message
  */
-export declare const readSyncStep1: (decoder: decoding.Decoder, encoder: encoding.Encoder, doc: Y.Doc) => void;
+export declare const readSyncStep1: (decoder: lib0.Decoder, encoder: lib0.Encoder, doc: Y.Doc) => void;
 /**
  * Read and apply Structs and then DeleteStore to a y instance.
  */
-export declare const readSyncStep2: (decoder: decoding.Decoder, doc: Y.Doc, transactionOrigin: unknown) => void;
-export declare const writeUpdate: (encoder: encoding.Encoder, update: Uint8Array) => void;
+export declare const readSyncStep2: (decoder: lib0.Decoder, doc: Y.Doc, transactionOrigin: unknown) => void;
+export declare const writeUpdate: (encoder: lib0.Encoder, update: Uint8Array) => void;
 /**
  * Read and apply Structs and then DeleteStore to a y instance.
  */
-export declare const readUpdate: (decoder: decoding.Decoder, doc: Y.Doc, transactionOrigin: unknown) => void;
+export declare const readUpdate: (decoder: lib0.Decoder, doc: Y.Doc, transactionOrigin: unknown) => void;
 /**
  * @param decoder: A message received from another client
  * @param encoder: The reply message. Will not be sent if empty.
  * @param doc:
  * @param transactionOrigin:
  */
-export declare const readSyncMessage: (decoder: decoding.Decoder, encoder: encoding.Encoder, doc: Y.Doc, transactionOrigin: unknown) => 0 | 1 | 2;
+export declare const readSyncMessage: (decoder: lib0.Decoder, encoder: lib0.Encoder, doc: Y.Doc, transactionOrigin: unknown) => 0 | 1 | 2;

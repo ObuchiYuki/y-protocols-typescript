@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean ; tsc",
-    "push": "npm run build ; git add .; git commit -m commit; git push"
+    "push": "make(){ if [[ -z \"$1\" ]]; then echo Commit message should not be empty. ;exit 1; fi; npm run build; git add .; git commit -m \"$1\"; git push; }; make "
   },
   "dependencies": {
     "lib0-typescript": "github:ObuchiYuki/lib0-typescript",

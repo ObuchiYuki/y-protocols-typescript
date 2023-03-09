@@ -1,8 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readSyncMessage = exports.readUpdate = exports.writeUpdate = exports.readSyncStep2 = exports.readSyncStep1 = exports.writeSyncStep2 = exports.writeSyncStep1 = exports.MessageType = void 0;
-const encoding = require("lib0/encoding");
-const decoding = require("lib0/decoding");
 const Y = require("yjs");
 var MessageType;
 (function (MessageType) {
@@ -21,14 +19,14 @@ var MessageType;
  * Create a sync step 1 message based on the state of the current shared document.
  */
 const writeSyncStep1 = (encoder, doc) => {
-    encoding.writeVarUint(encoder, MessageType.syncStep1);
+    encoder.writeVarUint(MessageType.syncStep1);
     const sv = Y.encodeStateVector(doc);
-    encoding.writeVarUint8Array(encoder, sv);
+    encoder.writeVarUint8Array(sv);
 };
 exports.writeSyncStep1 = writeSyncStep1;
 const writeSyncStep2 = (encoder, doc, encodedStateVector) => {
-    encoding.writeVarUint(encoder, MessageType.syncStep2);
-    encoding.writeVarUint8Array(encoder, Y.encodeStateAsUpdate(doc, encodedStateVector));
+    encoder.writeVarUint(MessageType.syncStep2);
+    encoder.writeVarUint8Array(Y.encodeStateAsUpdate(doc, encodedStateVector));
 };
 exports.writeSyncStep2 = writeSyncStep2;
 /**
@@ -37,14 +35,14 @@ exports.writeSyncStep2 = writeSyncStep2;
  * decoder: The reply to the received message
  * encoder: The received message
  */
-const readSyncStep1 = (decoder, encoder, doc) => (0, exports.writeSyncStep2)(encoder, doc, decoding.readVarUint8Array(decoder));
+const readSyncStep1 = (decoder, encoder, doc) => (0, exports.writeSyncStep2)(encoder, doc, decoder.readVarUint8Array());
 exports.readSyncStep1 = readSyncStep1;
 /**
  * Read and apply Structs and then DeleteStore to a y instance.
  */
 const readSyncStep2 = (decoder, doc, transactionOrigin) => {
     try {
-        Y.applyUpdate(doc, decoding.readVarUint8Array(decoder), transactionOrigin);
+        Y.applyUpdate(doc, decoder.readVarUint8Array(), transactionOrigin);
     }
     catch (error) {
         // This catches errors that are thrown by event handlers
@@ -53,8 +51,8 @@ const readSyncStep2 = (decoder, doc, transactionOrigin) => {
 };
 exports.readSyncStep2 = readSyncStep2;
 const writeUpdate = (encoder, update) => {
-    encoding.writeVarUint(encoder, MessageType.update);
-    encoding.writeVarUint8Array(encoder, update);
+    encoder.writeVarUint(MessageType.update);
+    encoder.writeVarUint8Array(update);
 };
 exports.writeUpdate = writeUpdate;
 /**
@@ -68,7 +66,7 @@ exports.readUpdate = exports.readSyncStep2;
  * @param transactionOrigin:
  */
 const readSyncMessage = (decoder, encoder, doc, transactionOrigin) => {
-    const messageType = decoding.readVarUint(decoder);
+    const messageType = decoder.readVarUint();
     if (messageType == MessageType.syncStep1) {
         (0, exports.readSyncStep1)(decoder, encoder, doc);
     }

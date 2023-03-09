@@ -1,5 +1,5 @@
-import { Observable } from 'lib0/observable';
 import * as Y from 'yjs';
+import * as lib0 from "lib0-typescript";
 export type MetaClientState = {
     clock: number;
     lastUpdated: number;
@@ -34,7 +34,7 @@ export interface Awareness {
  *
  * Awareness states must be updated every 30 seconds. Otherwise the Awareness instance will delete the client state.
  */
-export declare class Awareness extends Observable<string> {
+export declare class Awareness extends lib0.Observable<string> {
     document: Y.Doc;
     clientID: number;
     states: Map<number, State>;
